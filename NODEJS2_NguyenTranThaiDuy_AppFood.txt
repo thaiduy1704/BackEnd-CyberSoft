@@ -1,0 +1,70 @@
+CREATE DATABASE AppFood
+
+
+CREATE TABLE `user`(
+    `user_id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `full_name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NOT NULL
+) 
+CREATE TABLE `food`(
+    `food_id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `food_name` VARCHAR(255) NOT NULL,
+    `image` VARCHAR(255) NOT NULL,
+    `price` FLOAT NOT NULL,
+    `desc` VARCHAR(255),
+    `type_id`  INT UNSIGNED NOT NULL 
+) 
+CREATE TABLE `restaurant`(
+    `res_id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `res_name` VARCHAR(255) NOT NULL,
+    `image` VARCHAR(255) NOT NULL,
+    `desc` VARCHAR(255)
+)
+CREATE TABLE `food_type`(
+    `type_id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `type _name` VARCHAR(255)
+) 
+CREATE TABLE `sub_food`(
+    `sub_id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `sub_name` VARCHAR(255) NOT NULL,
+    `sub_price` FLOAT NOT NULL,
+    `food_id` INT UNSIGNED NOT NULL 
+) 
+CREATE TABLE `order`(
+   `user_id` INT UNSIGNED NOT NULL ,
+    `food_id` INT UNSIGNED NOT NULL ,
+    `amount` INT NOT NULL,
+    `code` VARCHAR(255),
+    `arr_sub_id` VARCHAR(255)
+) 
+CREATE TABLE `rate_res`(
+   `user_id` INT UNSIGNED NOT NULL ,
+    `res_id` INT UNSIGNED NOT NULL ,
+    `amount` INT NOT NULL,
+    `date_rate` DATETIME
+) CREATE TABLE `like_res`(
+    `user_id` INT UNSIGNED NOT NULL ,
+    `res_id` INT UNSIGNED NOT NULL ,
+    `date_like` DATETIME
+)
+
+
+ALTER TABLE `food` ADD CONSTRAINT `FK_type_id` FOREIGN KEY(`type_id`) REFERENCES `food_type`(`type_id`)
+
+ALTER TABLE `sub_food` ADD CONSTRAINT `FK_food_id` FOREIGN KEY(`food_id`) REFERENCES `food`(`food_id`)
+
+ALTER TABLE `order` ADD CONSTRAINT `FK_order_user_id` FOREIGN KEY(`user_id`) REFERENCES `user`(`user_id`)
+
+ALTER TABLE `order` ADD CONSTRAINT `FK_order_food_id` FOREIGN KEY(`food_id`) REFERENCES `food`(`food_id`)
+
+ALTER TABLE `rate_res` ADD CONSTRAINT `FK_rate_res_user_id` FOREIGN KEY(`user_id`) REFERENCES `user`(`user_id`)
+
+ALTER TABLE `rate_res` ADD CONSTRAINT `FK_rate_res_res_id` FOREIGN KEY(`res_id`) REFERENCES `restaurant`(`res_id`)
+
+ALTER TABLE `like_res` ADD CONSTRAINT `FK_like_res_user_id` FOREIGN KEY(`user_id`) REFERENCES `user`(`user_id`)
+
+ALTER TABLE `like_res` ADD CONSTRAINT `FK_like_res_res_id` FOREIGN KEY(`res_id`) REFERENCES `restaurant`(`res_id`)
+
+
+

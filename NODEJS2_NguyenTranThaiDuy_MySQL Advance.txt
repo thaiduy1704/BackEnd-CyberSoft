@@ -1,0 +1,141 @@
+-- @BLOCK
+CREATE DATABASE instagram;
+
+-- @BLOCK
+SHOW DATABASES
+
+-- @BLOCK
+USE instagram;
+
+-- @BLOCK
+CREATE TABLE `users`(
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `username` VARCHAR(255) NOT NULL,
+    `created_at` DATE NOT NULL
+);
+CREATE TABLE `comments`(
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `comment_text` TEXT NOT NULL,
+    `user_id` INT UNSIGNED NOT NULL,
+    `photo_id` INT UNSIGNED NOT NULL,
+    `created_at` DATE NOT NULL
+);
+CREATE TABLE `photos`(
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `image_url` TEXT NOT NULL,
+    `user_id` INT UNSIGNED NOT NULL,
+    `created_at` DATE NOT NULL
+);
+CREATE TABLE `photo_tags`(
+    `photo_id` INT UNSIGNED NOT NULL,
+    `tag_id` INT UNSIGNED NOT NULL
+);
+CREATE TABLE `tags`(
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `tag_name` VARCHAR(255) NOT NULL,
+    `created_at` DATE NOT NULL
+);
+CREATE TABLE `likes`(
+    `photo_id` INT UNSIGNED NOT NULL,
+    `user_id` INT UNSIGNED NOT NULL,
+    `created_at` DATE NOT NULL
+);
+CREATE TABLE `follows`(
+    `follower_id` INT UNSIGNED NOT NULL,
+    `followee_id` INT UNSIGNED NOT NULL,
+    `created_at` DATE NOT NULL
+);
+
+-- @BLOCK
+ALTER TABLE
+    `comments` ADD CONSTRAINT `comments_photo_id_foreign` FOREIGN KEY(`photo_id`) REFERENCES `photos`(`id`);
+
+-- @BLOCK
+ALTER TABLE
+    `comments` ADD CONSTRAINT `comments_user_id_foreign` FOREIGN KEY(`user_id`) REFERENCES `users`(`id`);
+
+-- @BLOCK
+ALTER TABLE
+    `photos` ADD CONSTRAINT `photos_user_id_foreign` FOREIGN KEY(`user_id`) REFERENCES `users`(`id`);
+
+-- @BLOCK
+ALTER TABLE
+    `photo_tags` ADD CONSTRAINT `photo_tags_photo_id_foreign` FOREIGN KEY(`photo_id`) REFERENCES `photos`(`id`);
+
+-- @BLOCK
+ALTER TABLE
+    `photo_tags` ADD CONSTRAINT `photo_tags_tag_id_foreign` FOREIGN KEY(`tag_id`) REFERENCES `tags`(`id`);
+
+-- @BLOCK
+ALTER TABLE
+    `follows` ADD CONSTRAINT `follows_follower_id_foreign` FOREIGN KEY(`follower_id`) REFERENCES `users`(`id`);
+
+-- @BLOCK    
+ALTER TABLE
+    `follows` ADD CONSTRAINT `follows_followee_id_foreign` FOREIGN KEY(`followee_id`) REFERENCES `users`(`id`);
+
+-- @BLOCK
+ALTER TABLE
+    `likes` ADD CONSTRAINT `likes_photo_id_foreign` FOREIGN KEY(`photo_id`) REFERENCES `photos`(`id`);
+
+-- @BLOCK
+ALTER TABLE
+    `likes` ADD CONSTRAINT `likes_user_id_foreign` FOREIGN KEY(`user_id`) REFERENCES `users`(`id`);
+    
+    
+    
+--Cau 1:
+SELECT * FROM users ORDER BY created_at ASC LIMIT 5 
+
+
+--Cau 2:
+SELECT COUNT(created_at), created_at FROM users GROUP BY created_at ORDER BY COUNT(created_at) DESC LIMIT 2
+ 
+-- Cau 3
+
+-- optimize: 
+SELECT users.* from users
+WHERE id not in (SELECT user_id from photos)
+
+-- Cau 4: 
+
+
+SELECT users.id, users.username, likes.photo_id, count(likes.photo_id) count_photo
+FROM likes, users, photos
+WHERE likes.photo_id = photos.id
+AND photos.user_id = users.id
+GROUP BY likes.photo_id
+HAVING count_photo = (SELECT count(photo_id) count_photo
+FROM likes
+GROUP BY photo_id
+ORDER BY count_photo desc limit 1)
+
+
+
+-- Cau 5
+
+SELECT users.id, users.username, count(photos.user_id) as count_image
+from photos, users
+where users.id = photos.user_id
+GROUP by users.id
+
+-- Cau 6 
+
+SELECT users.id as user_id, users.username as username, count(photo_tags.tag_id) as count_tag
+FROM photo_tags, users, photos
+WHERE photo_tags.photo_id = photos.id
+AND photos.user_id = users.id
+GROUP by photo_tags.photo_id 
+order by count_tag desc limit 5
+
+-- Cau 7
+
+
+SELECT user_id, users.username, count(user_id) as count_like
+from likes , users
+where likes.user_id = users.id
+group by user_id
+having count_like = 1
+
+
+
