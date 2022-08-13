@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String             @id @default(uuid())
+  fullName         String             @db.VarChar(255)
+  email            String             @unique @db.VarChar(255)
+  password         String             @db.VarChar(255)
+  Food             Food[]
+  Order            Order[]
+  RatingRestaurant RatingRestaurant[]
+  LikeRestaurant   LikeRestaurant[]
+}
+
+model Food {
+  id      String    @id @default(uuid())
+  name    String    @db.VarChar(255)
+  image   String    @db.VarChar(255)
+  price   Float
+  desc    String    @db.VarChar(255)
+  typeId  String
+  SubFood SubFood[]
+  User    User[]
+  Order   Order[]
+  type    FoodType  @relation(fields: [typeId], references: [id])
+}
+
+model SubFood {
+  id     String @id @default(uuid())
+  name   String @db.VarChar(255)
+  price  Float
+  foodId String
+  food   Food   @relation(fields: [foodId], references: [id])
+}
+
+model FoodType {
+  id   String @id @default(uuid())
+  name String @db.VarChar(255)
+  Food Food[]
+}
+
+model Order {
+  id       String @id @default(uuid())
+  arrSubId String @db.VarChar(255)
+  code     String @db.VarChar(255)
+  amount   Int
+  userId   String
+  foodId   String
+  user     User   @relation(fields: [userId], references: [id])
+  food     Food   @relation(fields: [foodId], references: [id])
+}
+
+model Restaurant {
+  id               String             @id @default(uuid())
+  name             String             @db.VarChar(255)
+  image            String             @db.VarChar(255)
+  desc             String             @db.VarChar(255)
+  RatingRestaurant RatingRestaurant[]
+  LikeRestaurant   LikeRestaurant[]
+}
+
+model RatingRestaurant {
+  id           String     @id @default(uuid())
+  amount       Int
+  date         DateTime   @updatedAt
+  userId       String
+  restaurantId String
+  user         User       @relation(fields: [userId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model LikeRestaurant {
+  id           String     @id @default(uuid())
+  date         DateTime   @updatedAt
+  userId       String
+  restaurantId String
+  user         User       @relation(fields: [userId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@unique([restaurantId, userId])
+}
